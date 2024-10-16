@@ -38,8 +38,14 @@ namespace Markdown
             {
                 return new ItalicMarkdownElement(line);
             }
-
-            return new ParagraphMarkdownElement(line);
+            else if (line.StartsWith("[") && line.EndsWith(")"))
+            {
+                return new LinkMarkdownElement(line);
+            }
+            else
+            {
+                return new ParagraphMarkdownElement(line);
+            }
         }
     }
 }
