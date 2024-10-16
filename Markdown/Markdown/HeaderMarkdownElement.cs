@@ -1,60 +1,89 @@
-namespace Markdown;
-
-// public class HeaderMarkdownElement : IMarkdownElement
-// {
-//     private string text;
-//     private string openingTag = "<h1>";
-//     private string closingTag = "</h1>";
-//     public HeaderMarkdownElement(string line)
-//     {
-//         text = line.Substring(1);
-//     }
-//     public string GetHtmlLine()
-//     {
-//         return $"{openingTag}{text}{closingTag}";
-//     }
-// }
+using System.Text;
+using Markdown;
 
 public class HeaderMarkdownElement : IMarkdownElement
 {
-    private IMarkdownElement nestedElement;
     private string text;
     private string openingTag = "<h1>";
     private string closingTag = "</h1>";
-
     public HeaderMarkdownElement(string line)
     {
-        int spaceIndex = line.IndexOf("_");
-        int spaceIndex2 = line.LastIndexOf("_");
-        if (spaceIndex != -1)
-        {
-            text = line.Substring(spaceIndex,spaceIndex2-spaceIndex+1);
-            nestedElement = CreateNestedMarkdownElement(text);
-        }
-        else
-        {
-            text = line.Substring(1);
-        }
+        text = line.Substring(1);
     }
-
     public string GetHtmlLine()
     {
-        if (nestedElement != null)
-        {
-            return $"{openingTag}{nestedElement.GetHtmlLine()}{closingTag}";
-        }
-        else
-        {
-            return $"{openingTag}{text}{closingTag}";
-        }
+        var nestedText = ProcessNestedTags(text);
+        return $"{openingTag}{nestedText}{closingTag}";
     }
-
-    private IMarkdownElement CreateNestedMarkdownElement(string line)
+    private string ProcessNestedTags(string text)
     {
-        if (line.StartsWith("__") && line.EndsWith("__"))
+        StringBuilder result = new StringBuilder();
+        StringBuilder currentText = new StringBuilder();
+        bool isBold = false; // Жирный текст
+        bool isItalic = false; // Курсивный текст
+
+        for (int i = 0; i < text.Length; i++)
         {
-            return new StrongMarkdownElement(line);
+            char currentChar = text[i];
+
+            if (currentChar == '_')
+            {
+                // Проверка на двойное подчеркивание для жирного текста
+                if (i + 1 < text.Length && text[i + 1] == '_')
+                {
+                    i++; // Пропускаем двойное подчеркивание
+
+                    if (isBold) // Закрываем жирный текст
+                    {
+                        if (currentText.Length > 0)
+                        {
+                            result.Append(currentText);
+                            currentText.Clear();
+                        }
+                        result.Append("</strong>");
+                        isBold = false;
+                    }
+                    else // Открываем жирный текст
+                    {
+                        if (currentText.Length > 0)
+                        {
+                            result.Append(currentText);
+                            currentText.Clear();
+                        }
+                        result.Append("<strong>");
+                        isBold = true;
+                    }
+                }
+                else // Обработка курсивного текста
+                {
+                    if (isItalic) // Закрываем курсивный текст
+                    {
+                        if (currentText.Length > 0)
+                        {
+                            result.Append(currentText);
+                            currentText.Clear();
+                        }
+                        result.Append("</em>");
+                        isItalic = false;
+                    }
+                    else // Открываем курсивный текст
+                    {
+                        if (currentText.Length > 0)
+                        {
+                            result.Append(currentText);
+                            currentText.Clear();
+                        }
+                        result.Append("<em>");
+                        isItalic = true;
+                    }
+                }
+            }
+            else
+            {
+                currentText.Append(currentChar); // Добавляем символ к текущему тексту
+            }
         }
-        return new ItalicMarkdownElement(line);
+
+        return result.ToString();
     }
 }

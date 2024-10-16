@@ -9,12 +9,17 @@ public class Tests
     {
     }
 
-    [Test]
-    public void HeaderMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString()
+    [TestCase("#Заголовок с _курсивом_","<h1>Заголовок с <em>курсивом</em></h1>")]
+    [TestCase("#Заголовок с __жирным__","<h1>Заголовок с <strong>жирным</strong></h1>")]
+    [TestCase("#Заголовок с __жирным__ и _курсивом_",
+        "<h1>Заголовок с <strong>жирным</strong> и <em>курсивом</em></h1>")]
+    [TestCase("#Заголовок с __жирным _жирным_ текстом__",
+        "<h1>Заголовок с <strong>жирным <em>жирным</em> текстом</strong></h1>")]
+    [TestCase("#Заголовок с _жирным __жирным__ текстом_",
+        "<h1>Заголовок с <em>жирным <strong>жирным</strong> текстом</em></h1>")]
+    public void HeaderMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString(string text,string expectedHtml)
     {
         // Arrange
-        var text = "#My string";
-        var expectedHtml = "<h1>My string</h1>";
         var element = new HeaderMarkdownElement(text);
 
         // Act
@@ -49,7 +54,7 @@ public class Tests
     [TestCase("__Text _ italics_ here.__", "<strong>Text _ italics_ here.</strong>")]
     [TestCase("__This _italic _ text jumps.__", "<strong>This _italic _ text jumps.</strong>")]
     [TestCase("__This is a \\_simple\\_ text.__", "<strong>This is a _simple_ text.</strong>")]
-    [TestCase("__This is a \\\\_simple_ text.__", "<strong>This is a <em>simple</em> text.</strong>")]
+    [TestCase("__This is a \\\\_simple_ text.__", "<strong>This is a \\<em>simple</em> text.</strong>")]
     [TestCase("__This is a sim\\ple text.__", "<strong>This is a sim\\ple text.</strong>")]
     public void StrongMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString(string text,string expectedHtml)
     {
@@ -61,6 +66,15 @@ public class Tests
 
         // Assert
         Assert.AreEqual(expectedHtml, htmlLine);
+    }
+
+    [Test]
+    public void LinkMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString()
+    {
+        var element = new LinkMarkdownElement("[google](https://www.google.ru/?hl=ru)");
+        var htmlLine = element.GetHtmlLine();
+        var expected = "<a href='https://www.google.ru/?hl=ru'>google</a>";
+        Assert.AreEqual(expected,htmlLine);
     }
 
     [Test]
