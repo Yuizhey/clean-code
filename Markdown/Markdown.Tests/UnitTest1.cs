@@ -1,3 +1,5 @@
+using System.Net.Mime;
+
 namespace Markdown.Tests;
 
 public class Tests
@@ -37,12 +39,21 @@ public class Tests
         Assert.AreEqual(expectedHtml, htmlLine);
     }
 
-    [Test]
-    public void StrongMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString()
+    [TestCase("__This is a simple text.__", "<strong>This is a simple text.</strong>")]
+    [TestCase("__This is _italic_ text.__", "<strong>This is <em>italic</em> text.</strong>")]
+    [TestCase("__This is a number _12_3 and should not be italic.__", "<strong>This is a number _12_3 and should not be italic.</strong>")]
+    [TestCase("___start_ and _middle_ and _end_.__", "<strong><em>start</em> and <em>middle</em> and <em>end</em>.</strong>")]
+    [TestCase("__This _is_ a simple _test_.__", "<strong>This <em>is</em> a simple <em>test</em>.</strong>")]
+    [TestCase("__This is _italic text.__", "<strong>This is _italic text.</strong>")]
+    [TestCase("__This is _italic _nested_ text_.__", "<strong>This is <em>italic _nested</em> text_.</strong>")]
+    [TestCase("__Text _ italics_ here.__", "<strong>Text _ italics_ here.</strong>")]
+    [TestCase("__This _italic _ text jumps.__", "<strong>This _italic _ text jumps.</strong>")]
+    [TestCase("__This is a \\_simple\\_ text.__", "<strong>This is a _simple_ text.</strong>")]
+    [TestCase("__This is a \\\\_simple_ text.__", "<strong>This is a <em>simple</em> text.</strong>")]
+    [TestCase("__This is a sim\\ple text.__", "<strong>This is a sim\\ple text.</strong>")]
+    public void StrongMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString(string text,string expectedHtml)
     {
         // Arrange
-        var text = "__My string__";
-        var expectedHtml = "<strong>My string</strong>";
         var element = new StrongMarkdownElement(text);
 
         // Act
@@ -74,6 +85,11 @@ public class Tests
     [TestCase("#My string\n_My string_\n__My string__",
         "<h1>My string</h1>\n<em>My string</em>\n<strong>My string</strong>\n")]
     [TestCase("#Заголовок с _курсивом_","<h1>Заголовок с <em>курсивом</em></h1>")]
+    [TestCase("#Заголовок с __жирным__","<h1>Заголовок с <strong>жирным</strong></h1>")]
+    [TestCase("#Заголовок с __жирным__ и _курсивом_",
+        "<h1>Заголовок с <strong>жирным</strong> и <em>курсивом</em></h1>")]
+    [TestCase("#Заголовок __с _разными_ символами__",
+        "<h1>Заголовок <strong>с <em>разными</em> символами</strong></h1>")]
     public void MarkdownProcessor_GetHtml_ShouldReturnCorrectHtml(string markdownText, string expectedHtml)
     {
         // Arrange
