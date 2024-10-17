@@ -4,8 +4,8 @@ namespace Markdown;
 
 public class MarkdownProcessor
 {
-    private MarkdownParser _parser;
-    private MarkdownRenderer _renderer;
+    private IMarkdownParser _parser;
+    private IMarkdownRenderer _renderer;
     public MarkdownProcessor()
     {
         _parser = new MarkdownParser();

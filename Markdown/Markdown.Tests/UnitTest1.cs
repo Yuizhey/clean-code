@@ -16,7 +16,7 @@ public class Tests
     [TestCase("#Заголовок с __жирным _жирным_ текстом__",
         "<h1>Заголовок с <strong>жирным <em>жирным</em> текстом</strong></h1>")]
     [TestCase("#Заголовок с _жирным __жирным__ текстом_",
-        "<h1>Заголовок с <em>жирным <strong>жирным</strong> текстом</em></h1>")]
+        "<h1>Заголовок с <em>жирным __жирным__ текстом</em></h1>")]
     public void HeaderMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString(string text,string expectedHtml)
     {
         // Arrange

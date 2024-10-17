@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Markdown
 {
-    public class MarkdownParser
+    public class MarkdownParser : IMarkdownParser
     {
         public List<IMarkdownElement> Parse(string markdownText)
         {

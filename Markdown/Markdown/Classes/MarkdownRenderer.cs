@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Markdown
+namespace Markdown 
 {
-    public class MarkdownRenderer
+    public class MarkdownRenderer : IMarkdownRenderer
     {
         public string Render(List<IMarkdownElement> elements)
         {
