@@ -11,6 +11,6 @@ public class ItalicMarkdownElement : IMarkdownElement
     }
     public string GetHtmlLine()
     {
-        return $"{openingTag}{text}{closingTag}";
+        return $"{openingTag}{text}{closingTag}\n";
     }
 }

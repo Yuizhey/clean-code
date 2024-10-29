@@ -14,7 +14,7 @@ public class StrongMarkdownElement : IMarkdownElement
     public string GetHtmlLine()
     { 
         string processedText = ProcessNestedText(text); 
-        return $"{openingTag}{processedText}{closingTag}";
+        return $"{openingTag}{processedText}{closingTag}\n";
     }
 
     private string ProcessNestedText(string text)

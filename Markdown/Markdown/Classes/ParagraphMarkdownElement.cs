@@ -13,80 +13,123 @@ public class ParagraphMarkdownElement : IMarkdownElement
     }
     public string GetHtmlLine()
     {
-        var nestedText = ProcessNestedTags(text);
-        return $"{openingTag}{nestedText}{closingTag}";
+        var nestedText = ProcessNested(text);
+        return $"{openingTag}{nestedText}{closingTag}\n";
     }
-    private string ProcessNestedTags(string text)
+    private string ProcessNested(string text)
     {
         StringBuilder result = new StringBuilder();
         StringBuilder currentText = new StringBuilder();
-        bool isBold = false; // Жирный текст
-        bool isItalic = false; // Курсивный текст
+        bool isBold = false;
+        bool isItalic = false;
 
         for (int i = 0; i < text.Length; i++)
         {
             char currentChar = text[i];
 
-            if (currentChar == '_')
+            if (currentChar == '\\')
             {
-                // Проверка на двойное подчеркивание для жирного текста
-                if (i + 1 < text.Length && text[i + 1] == '_')
+                if (i + 1 < text.Length)
                 {
-                    i++; // Пропускаем двойное подчеркивание
-
-                    if (isBold) // Закрываем жирный текст
+                    char nextChar = text[i + 1];
+                    if (nextChar == '_' || nextChar == '\\')
                     {
-                        if (currentText.Length > 0)
-                        {
-                            result.Append(currentText);
-                            currentText.Clear();
-                        }
-
-                        result.Append("</strong>");
-                        isBold = false;
-                    }
-                    else // Открываем жирный текст
-                    {
-                        if (currentText.Length > 0)
-                        {
-                            result.Append(currentText);
-                            currentText.Clear();
-                        }
-
-                        result.Append("<strong>");
-                        isBold = true;
+                        currentText.Append(nextChar);
+                        i++;
+                        continue;
                     }
                 }
-                else // Обработка курсивного текста
+
+                currentText.Append(currentChar);
+                continue;
+            }
+
+            if (currentChar == '_')
+            {
+                bool isStartOfItalic = (i + 1 < text.Length && !char.IsWhiteSpace(text[i + 1]) && char.IsLetter(text[i + 1]));
+                bool isEndOfItalic = (i > 0 && !char.IsWhiteSpace(text[i - 1]) && char.IsLetter(text[i - 1]) || text[i - 2] == '\\');
+                bool isPreviousCharDigit = (i > 0 && char.IsDigit(text[i - 1]));
+                bool isNextCharDigit = (i + 1 < text.Length && char.IsDigit(text[i + 1]));
+
+                if (isPreviousCharDigit || isNextCharDigit)
+                {
+                    currentText.Append(currentChar);
+                    continue;
+                }
+
+                if (i + 1 < text.Length && text[i + 1] == '_')
+                {
+                    i++;
+                    if (isItalic)
+                    {
+                        if (currentChar == '_')
+                            currentText.Append(currentChar);
+                        currentText.Append(currentChar);
+                        continue;
+                    }
+                    else
+                    {
+                        if (isBold) // Закрываем жирный текст
+                        {
+                            if (currentText.Length > 0)
+                            {
+                                result.Append(currentText);
+                                currentText.Clear();
+                            }
+                            result.Append("</strong>");
+                            isBold = false;
+                        }
+                        else // Открываем жирный текст
+                        {
+                            if (currentText.Length > 0)
+                            {
+                                result.Append(currentText);
+                                currentText.Clear();
+                            }
+                            result.Append("<strong>");
+                            isBold = true;
+                        }
+                    }
+                }
+                else
                 {
                     if (isItalic) // Закрываем курсивный текст
                     {
-                        if (currentText.Length > 0)
+                        if (isEndOfItalic)
                         {
-                            result.Append(currentText);
+                            result.Append("<em>").Append(currentText.ToString().Substring(1)).Append("</em>");
                             currentText.Clear();
+                            isItalic = false;
                         }
-
-                        result.Append("</em>");
-                        isItalic = false;
+                        else
+                        {
+                            currentText.Append(currentChar);
+                        }
                     }
                     else // Открываем курсивный текст
                     {
-                        if (currentText.Length > 0)
+                        if (isStartOfItalic)
                         {
                             result.Append(currentText);
                             currentText.Clear();
+                            currentText.Append('_');
+                            isItalic = true;
                         }
-
-                        result.Append("<em>");
-                        isItalic = true;
+                        else
+                        {
+                            currentText.Append(currentChar);
+                        }
                     }
                 }
             }
             else
             {
-                currentText.Append(currentChar); // Добавляем символ к текущему тексту
+                currentText.Append(currentChar);
             }
+        }
+        if (currentText.Length > 0)
+        {
+            result.Append(currentText.ToString());
         }
 
         return result.ToString();
