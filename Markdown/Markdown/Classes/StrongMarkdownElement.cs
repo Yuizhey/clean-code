@@ -19,7 +19,7 @@ public class StrongMarkdownElement : IMarkdownElement
 
     private string ProcessNestedText(string text)
     {
-        var nestedTextProcessor = new NestedTextProcessor(text);
+        var nestedTextProcessor = new NestedTextProcessor(text,TypeOfElement.StrongMarkdownElement);
         var result = nestedTextProcessor.GetNestedHtmlLine();
         return result;
     }
