@@ -4,17 +4,17 @@ namespace Markdown;
 
 public class MarkdownProcessor
 {
-    private IMarkdownParser _parser;
-    private IMarkdownRenderer _renderer;
-    public MarkdownProcessor()
+    private IMarkdownParser parser;
+    private IMarkdownRenderer renderer;
+    public MarkdownProcessor(IMarkdownParser parser,IMarkdownRenderer renderer)
     {
-        _parser = new MarkdownParser();
-        _renderer = new MarkdownRenderer();
+        this.parser = parser;
+        this.renderer = renderer;
     }
     public string GetHtml(string markdownText)
     {
-        var elements = _parser.Parse(markdownText);
-        var html = _renderer.Render(elements);
+        var elements = parser.Parse(markdownText);
+        var html = renderer.Render(elements);
         return html;
-    }  
+    }
 }

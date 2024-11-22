@@ -115,7 +115,9 @@ public class Tests
     public void MarkdownProcessor_GetHtml_ShouldReturnCorrectHtml(string markdownText, string expectedHtml)
     {
         // Arrange
-        var markdownProcessor = new MarkdownProcessor();
+        var parser = new MarkdownParser();
+        var renderer = new MarkdownRenderer();
+        var markdownProcessor = new MarkdownProcessor(parser, renderer);
         // Act
         var html = markdownProcessor.GetHtml(markdownText);
         // Assert
