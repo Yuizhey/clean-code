@@ -37,12 +37,18 @@ public class Tests
         Assert.AreEqual(expectedHtml, htmlLine);
     }
 
-    [Test]
-    public void ItalicMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString()
+    [TestCase("_This is italic text._", "<em>This is italic text.</em>\n")]
+    [TestCase("_This is __nested strong__ text._", "<em>This is __nested strong__ text.</em>\n")]
+    [TestCase("_This is a _nested italic_ text._", "<em>This is a _nested italic_ text.</em>\n")]
+    [TestCase("_Number _12_3 should not be italic._", "<em>Number _12_3 should not be italic.</em>\n")]
+    [TestCase("_This text ends with _italics__.", "<em>This text ends with _italics__</em>\n")]
+    [TestCase("_Text _italics_ jumps._", "<em>Text _italics_ jumps.</em>\n")]
+    [TestCase("_This is a sim\\ple text._", "<em>This is a sim\\ple text.</em>\n")]
+    [TestCase("_This is __strong _nested__ text._", "<em>This is __strong _nested__ text.</em>\n")]
+    [TestCase("_Empty underscores _ not italic_", "<em>Empty underscores _ not italic</em>\n")]
+    public void ItalicMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString(string text, string expectedHtml)
     {
         // Arrange
-        var text = "_My string_";
-        var expectedHtml = "<em>My string</em>\n";
         var element = new ItalicMarkdownElement(text);
 
         // Act
@@ -51,6 +57,7 @@ public class Tests
         // Assert
         Assert.AreEqual(expectedHtml, htmlLine);
     }
+
 
     [TestCase("__This is a simple text.__", "<strong>This is a simple text.</strong>\n")]
     [TestCase("__This is _italic_ text.__", "<strong>This is <em>italic</em> text.</strong>\n")]
@@ -75,22 +82,40 @@ public class Tests
         // Assert
         Assert.AreEqual(expectedHtml, htmlLine);
     }
-
-    [Test]
-    public void LinkMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString()
-    {
-        var element = new LinkMarkdownElement("[google](https://www.google.ru/?hl=ru)");
-        var htmlLine = element.GetHtmlLine();
-        var expected = "<a href='https://www.google.ru/?hl=ru'>google</a>";
-        Assert.AreEqual(expected,htmlLine);
-    }
-
-    [Test]
-    public void ParagraphMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString()
+    
+    [TestCase("[google](https://www.google.ru/?hl=ru)", "<a href='https://www.google.ru/?hl=ru'>google</a>")]
+    [TestCase("[](/someurl)", "<a href='/someurl'></a>")]
+    [TestCase("[Link]()", "<a href=''>Link</a>")]
+    [TestCase("[Link](https://example.com/?a=1&b=2)", "<a href='https://example.com/?a=1&b=2'>Link</a>")]
+    [TestCase("[<b>bold</b>](https://example.com)", "<a href='https://example.com'><b>bold</b></a>")]
+    [TestCase("[Absolute Link](https://example.com)", "<a href='https://example.com'>Absolute Link</a>")]
+    [TestCase("[Relative Link](/home)", "<a href='/home'>Relative Link</a>")]
+    public void LinkMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString(string markdown, string expectedHtml)
     {
         // Arrange
-        var text = "My string";
-        var expectedHtml = "<p>My string</p>\n";
+        var element = new LinkMarkdownElement(markdown);
+
+        // Act
+        var htmlLine = element.GetHtmlLine();
+
+        // Assert
+        Assert.AreEqual(expectedHtml, htmlLine);
+    }
+
+
+    [TestCase("This is a simple paragraph.", "<p>This is a simple paragraph.</p>\n")]
+    [TestCase("Paragraph with _italic_ text.", "<p>Paragraph with <em>italic</em> text.</p>\n")]
+    [TestCase("Paragraph with __bold__ text.", "<p>Paragraph with <strong>bold</strong> text.</p>\n")]
+    [TestCase("Paragraph with __bold and _italic_ text__.", "<p>Paragraph with <strong>bold and <em>italic</em> text</strong>.</p>\n")]
+    [TestCase("Paragraph with escaped \\_italic\\_.", "<p>Paragraph with escaped _italic_.</p>\n")]
+    [TestCase("Paragraph with multiple lines\nand more content.", "<p>Paragraph with multiple lines\nand more content.</p>\n")]
+    [TestCase("This is a simple \\ paragraph.", "<p>This is a simple \\ paragraph.</p>\n")]
+    [TestCase("Paragraph with number 12_3, not italic.", "<p>Paragraph with number 12_3, not italic.</p>\n")]
+    [TestCase("Escaped __bold__ and \\_italic\\_.", "<p>Escaped <strong>bold</strong> and _italic_.</p>\n")]
+    [TestCase("Complex paragraph with __bold _italic_ and text__ inside.", "<p>Complex paragraph with <strong>bold <em>italic</em> and text</strong> inside.</p>\n")]
+    public void ParagraphMarkdownElement_GetHtmlLine_ShouldReturnCorrectHtmlString(string text, string expectedHtml)
+    {
+        // Arrange
         var element = new ParagraphMarkdownElement(text);
 
         // Act
